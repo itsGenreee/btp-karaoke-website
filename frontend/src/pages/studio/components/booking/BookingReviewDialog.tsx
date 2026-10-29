@@ -1,7 +1,7 @@
 import { HugeiconsIcon } from '@hugeicons/react'
 import { Cancel01Icon } from '@hugeicons/core-free-icons'
 import type { Service } from '../../../../lib/booking-api'
-import { formatDay, peso } from '../../../../lib/booking-format'
+import { formatDay, peso, formatTime12h } from '../../../../lib/booking-format'
 
 type BookingReviewDialogProps = {
   service: Service
@@ -79,7 +79,7 @@ export default function BookingReviewDialog({
           <DetailRow label="Service" value={service.name} />
           <DetailRow label="Date" value={formatDay(bookingDate)} />
           {bookingTime && (
-            <DetailRow label="Time" value={`${bookingTime.slice(0, 5)} (PH time)`} />
+            <DetailRow label="Time" value={formatTime12h(bookingTime)} />
           )}
           <DetailRow label="Name" value={customerName} />
           <DetailRow label="Contact number" value={customerContact} />

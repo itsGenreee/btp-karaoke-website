@@ -23,6 +23,19 @@ export function formatDay(isoDate: string): string {
   return dayFormat.format(new Date(`${isoDate}T00:00:00Z`))
 }
 
+export function formatTime12h(timeStr: string): string {
+  if (!timeStr) return ''
+  const parts = timeStr.slice(0, 5).split(':')
+  if (parts.length < 2) return timeStr
+  let hours = parseInt(parts[0], 10)
+  const minutes = parts[1]
+  if (isNaN(hours)) return timeStr
+  const ampm = hours >= 12 ? 'PM' : 'AM'
+  hours = hours % 12
+  hours = hours ? hours : 12
+  return `${String(hours).padStart(2, '0')}:${minutes} ${ampm}`
+}
+
 /**
  * The first day at or after `startIso` that is not blocked. Used to prefill the
  * date field so a closed "today" does not greet the customer with an error.
