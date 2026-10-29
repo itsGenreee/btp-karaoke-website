@@ -140,6 +140,8 @@ Last updated: October 29, 2026
 
 ### Other Changes
 
+- Merge branch 'develop' into fix/booking-approval-route-order (0efcc8e)
+- Merge pull request #68 from FR4NC31/fix/booking-review-time-12h (ba25233)
 - Merge branch 'develop' into fix/booking-review-time-12h (481e706)
 - Merge pull request #67 from FR4NC31/feat/admin-media-redesign (2d10f2b)
 - Merge pull request #66 from FR4NC31/feat/booking-review-dialog (276fe33)
