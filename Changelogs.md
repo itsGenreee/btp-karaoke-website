@@ -59,6 +59,7 @@ Last updated: October 29, 2026
 
 ### Bug Fixes
 
+- fix(admin): resolve 404 unknown action error on booking payment approval (d528a70)
 - fix(admin): address media hub review findings (cc7e0c9)
 - fix(admin): resolve action type mismatch for booking details dialog actions (dd71ecd)
 - fix(admin): Fixed bug changes (bd4b93a)
@@ -138,6 +139,7 @@ Last updated: October 29, 2026
 
 ### Other Changes
 
+- Merge pull request #67 from FR4NC31/feat/admin-media-redesign (2d10f2b)
 - Merge pull request #66 from FR4NC31/feat/booking-review-dialog (276fe33)
 - Merge pull request #65 from FR4NC31/feat/admin-and-booking-updates (73a4a5b)
 - Merge pull request #64 from FR4NC31/feat/booking-hold-suspension (48a4041)
