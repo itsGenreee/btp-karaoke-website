@@ -85,6 +85,13 @@
       "when": 1793084856905,
       "tag": "0011_brainy_doctor_faustus",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1793450000000,
+      "tag": "0012_contact_verification",
+      "breakpoints": true
     }
   ]
 }

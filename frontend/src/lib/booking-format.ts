@@ -23,6 +23,26 @@ export function formatDay(isoDate: string): string {
   return dayFormat.format(new Date(`${isoDate}T00:00:00Z`))
 }
 
+export function formatPhoneNumber(phone: string): string {
+  if (!phone || phone === 'Not set') return phone
+  let cleaned = phone.replace(/[^\d+]/g, '')
+  if (cleaned.startsWith('+63')) {
+    const rest = cleaned.slice(3)
+    const digits = rest.startsWith('0') ? rest.slice(1) : rest
+    return `(+63)${digits}`
+  }
+  if (cleaned.startsWith('63') && cleaned.length === 12) {
+    const rest = cleaned.slice(2)
+    const digits = rest.startsWith('0') ? rest.slice(1) : rest
+    return `(+63)${digits}`
+  }
+  if (cleaned.startsWith('0') && cleaned.length >= 10) {
+    const rest = cleaned.slice(1)
+    return `(+63)${rest}`
+  }
+  return `(+63)${cleaned}`
+}
+
 export function formatTime12h(timeStr: string): string {
   if (!timeStr) return ''
   const parts = timeStr.slice(0, 5).split(':')

@@ -4,6 +4,7 @@ import { listServices, studioToday } from '../modules/bookings/index.ts'
 import { listPublicMedia } from '../modules/media/index.ts'
 import { getUserMembership } from '../modules/membership/index.ts'
 import { getGcashQrUrl } from '../modules/settings/index.ts'
+import { sendPhoneVerificationOtp, verifyPhoneOtp } from '../modules/users/verification.ts'
 import { requireSession } from '../middleware/session.ts'
 
 const publicApi = new Hono()
@@ -15,6 +16,32 @@ publicApi.get('/me', requireSession, (c) => {
     throw new HTTPException(401)
   }
   return c.json({ user: session.user })
+})
+
+publicApi.post('/me/phone/send-otp', requireSession, async (c) => {
+  const session = c.get('session')
+  if (!session) throw new HTTPException(401)
+  try {
+    const result = await sendPhoneVerificationOtp(session.user.id)
+    return c.json(result)
+  } catch (error) {
+    return c.json({ error: error instanceof Error ? error.message : 'Failed to send OTP' }, 400)
+  }
+})
+
+publicApi.post('/me/phone/verify-otp', requireSession, async (c) => {
+  const session = c.get('session')
+  if (!session) throw new HTTPException(401)
+  try {
+    const body = await c.req.json<{ otp?: string }>()
+    if (!body.otp) {
+      return c.json({ error: 'OTP is required' }, 400)
+    }
+    const result = await verifyPhoneOtp(session.user.id, body.otp)
+    return c.json(result)
+  } catch (error) {
+    return c.json({ error: error instanceof Error ? error.message : 'Failed to verify OTP' }, 400)
+  }
 })
 
 // Public: the catalog is marketing copy, no session needed to browse it.

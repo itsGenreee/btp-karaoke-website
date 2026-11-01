@@ -10,6 +10,7 @@ export type ProfileIdentity = {
   email: string
   emailVerified: boolean
   phone: string
+  phoneVerified: boolean
   handle: string
   memberSince: string
   location: ProfileLocation

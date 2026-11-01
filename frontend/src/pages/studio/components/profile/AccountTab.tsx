@@ -21,10 +21,11 @@ type AccountTabProps = {
   identity: ProfileIdentity
   onLocationSaved: () => void | Promise<void>
   onImageSaved?: () => void | Promise<void>
+  onPhoneVerified?: () => void | Promise<void>
 }
 
-export default function AccountTab({ identity, onLocationSaved, onImageSaved }: AccountTabProps) {
-  const { image, fullName, email, emailVerified, phone, handle, memberSince, location } = identity
+export default function AccountTab({ identity, onLocationSaved, onImageSaved, onPhoneVerified }: AccountTabProps) {
+  const { image, fullName, email, emailVerified, phone, phoneVerified, handle, memberSince, location } = identity
 
   const CROP_SIZE = 256
   const [avatarOpen, setAvatarOpen] = useState(false)
@@ -39,6 +40,63 @@ export default function AccountTab({ identity, onLocationSaved, onImageSaved }: 
   const [avatarError, setAvatarError] = useState('')
   const fileInputRef = useRef<HTMLInputElement>(null)
   const cropViewportRef = useRef<HTMLDivElement>(null)
+
+  const [otpModalOpen, setOtpModalOpen] = useState(false)
+  const [otpCode, setOtpCode] = useState('')
+  const [otpLoading, setOtpLoading] = useState(false)
+  const [otpError, setOtpError] = useState('')
+  const [otpSuccess, setOtpSuccess] = useState('')
+
+  async function handleSendOtp() {
+    setOtpLoading(true)
+    setOtpError('')
+    setOtpSuccess('')
+    try {
+      const res = await fetch('/api/me/phone/send-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to send OTP')
+      }
+      setOtpSuccess('6-digit OTP sent successfully via SMS!')
+    } catch (err) {
+      setOtpError(err instanceof Error ? err.message : 'Failed to send OTP')
+    } finally {
+      setOtpLoading(false)
+    }
+  }
+
+  async function handleVerifyOtp() {
+    if (!/^\d{6}$/.test(otpCode)) {
+      setOtpError('Please enter a valid 6-digit number.')
+      return
+    }
+    setOtpLoading(true)
+    setOtpError('')
+    setOtpSuccess('')
+    try {
+      const res = await fetch('/api/me/phone/verify-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ otp: otpCode }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        throw new Error(data.error || 'Invalid OTP')
+      }
+      setOtpSuccess('Phone number verified successfully!')
+      setTimeout(() => {
+        setOtpModalOpen(false)
+        onPhoneVerified?.()
+      }, 1500)
+    } catch (err) {
+      setOtpError(err instanceof Error ? err.message : 'Verification failed')
+    } finally {
+      setOtpLoading(false)
+    }
+  }
 
   function openAvatarModal() {
     setAvatarError('')
@@ -245,12 +303,40 @@ export default function AccountTab({ identity, onLocationSaved, onImageSaved }: 
             hint="Primary Email"
             verified={emailVerified}
           />
-          <DetailField
-            icon={PhoneIcon}
-            label="Phone Number"
-            value={phone}
-            hint="Used for room reservation/reminders"
-          />
+          <div className="rounded-lg border border-border bg-surface-elevated p-4 flex flex-col justify-between">
+            <div>
+              <p className="flex items-center gap-1.5 text-[10px] font-bold tracking-widest text-text-muted uppercase">
+                <HugeiconsIcon icon={PhoneIcon} size={12} />
+                Phone Number
+              </p>
+              <p className="mt-1.5 flex items-center gap-1.5 text-sm font-semibold break-words text-text-primary">
+                {phone}
+                {phoneVerified && (
+                  <span className="inline-flex items-center gap-1 rounded bg-success/15 px-2 py-0.5 text-[10px] font-bold text-success uppercase">
+                    Verified
+                  </span>
+                )}
+              </p>
+              <p className={`mt-0.5 text-[11px] ${phoneVerified ? 'text-success' : 'text-text-muted'}`}>
+                {phoneVerified ? 'Contact number verified' : 'Used for room reservation/reminders'}
+              </p>
+            </div>
+            {phone && phone !== 'Not set' && !phoneVerified && (
+              <button
+                type="button"
+                onClick={() => {
+                  setOtpModalOpen(true)
+                  setOtpCode('')
+                  setOtpError('')
+                  setOtpSuccess('')
+                  handleSendOtp()
+                }}
+                className="mt-3 inline-flex items-center justify-center rounded-lg bg-primary/15 px-3 py-1.5 text-xs font-semibold text-primary transition hover:bg-primary/25"
+              >
+                Verify Phone Number
+              </button>
+            )}
+          </div>
         </div>
       </section>
 
@@ -274,6 +360,67 @@ export default function AccountTab({ identity, onLocationSaved, onImageSaved }: 
           <DetailField label="Lyrics Display" value="Large text · Tagalog transliteration" hint="Rehearsal screen overlay" />
         </div>
       </section>
+
+      <Dialog open={otpModalOpen} onOpenChange={setOtpModalOpen}>
+        <DialogContent className="border border-border bg-surface text-text-primary">
+          <DialogHeader>
+            <DialogTitle>Verify Phone Number</DialogTitle>
+            <DialogDescription className="text-text-secondary">
+              Enter the 6-digit OTP sent to your phone number via SMS.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="flex flex-col gap-4 py-2">
+            <div>
+              <label className="block text-xs font-semibold uppercase text-text-muted mb-1.5">
+                6-Digit Verification Code
+              </label>
+              <input
+                type="text"
+                maxLength={6}
+                value={otpCode}
+                onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                placeholder="123456"
+                className="w-full rounded-lg border border-border bg-background px-4 py-2.5 text-center font-mono text-lg tracking-widest text-text-primary focus:border-primary focus:outline-none"
+              />
+            </div>
+
+            {otpError && <p role="alert" className="text-sm text-error">{otpError}</p>}
+            {otpSuccess && <p className="text-sm text-success">{otpSuccess}</p>}
+
+            <div className="flex items-center justify-between">
+              <button
+                type="button"
+                onClick={handleSendOtp}
+                disabled={otpLoading}
+                className="text-xs font-semibold text-primary transition hover:underline disabled:opacity-60"
+              >
+                Resend Code
+              </button>
+              <span className="text-xs text-text-muted">Code expires in 5 minutes</span>
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-2">
+            <button
+              type="button"
+              onClick={() => setOtpModalOpen(false)}
+              disabled={otpLoading}
+              className="rounded-lg border border-border bg-surface-elevated px-4 py-2 text-sm font-semibold text-text-secondary transition hover:text-text-primary disabled:opacity-60"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={handleVerifyOtp}
+              disabled={otpLoading || otpCode.length !== 6}
+              className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-text-primary transition hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {otpLoading ? 'Verifying…' : 'Verify Code'}
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={avatarOpen} onOpenChange={setAvatarOpen}>
         <DialogContent className="border border-border bg-surface text-text-primary">
