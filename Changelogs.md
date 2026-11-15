@@ -187,6 +187,7 @@ Last updated: November 14, 2026
 
 ### Other Changes
 
+- Merge pull request #97 from itsGenreee/feat/spotify-signin-wiring (9bc7c36)
 - Merge pull request #96 from itsGenreee/docs/spotify-google-legal-reference (bc783c4)
 - Merge branch 'develop' into docs/spotify-google-legal-reference (69da42b)
 - Merge pull request #95 from itsGenreee/feat/spotify-social-provider (b3e4b06)
