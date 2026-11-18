@@ -1,5 +1,13 @@
 # Development Changelog
 
+## ⚠️ Branch Policy (read before merging)
+
+- **`develop`** is the deployment branch. It must stay Spotify-free and deployable at all times.
+- **`develop-v2`** carries all Spotify features (auth provider, sign-in wiring, badge, legal ref, admin plugin disabled-guard).
+- **Sync direction is one-way only:** `develop` → `develop-v2` (pull updates). **Never merge `develop-v2` → `develop`** until Spotify production integration is fully validated.
+- `develop-v2` may pull commits from `develop` (admin plugin, bug fixes, UI work) to stay current.
+- Spotify activation on `develop` is gated by `SPOTIFY_CLIENT_ID` being set (see PR #98). Do not set it in production until the Spotify integration is validated on `develop-v2`.
+
 ## Unreleased
 
 Last updated: November 14, 2026
